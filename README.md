@@ -2,5 +2,7 @@ riceDB-server
 ==================
 
 #Install
-`pip3 install -r requirements.txt`
-`./test.sh`
+```bash
+pip3 install -r requirements.txt
+./test.sh 
+```

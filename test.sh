@@ -1,6 +1,6 @@
 #!/bin/bash
 
-python3 server.py &
+python3 ricedb_server.py &
 SERVER_PID=$!
 
 sleep 1 #server up wait
