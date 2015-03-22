@@ -95,7 +95,7 @@ def create_package():
 @app.route('/ricedb/api/v1.0/packages/<int:package_id>', methods=['PUT'])
 @auth.login_required
 def update_package(package_id):
-    package = list(filter(lambda t: t['id'] == package_id, packages)) #TODO:implement DB
+    package = [dict(zip(['id','title','program','url','images','description'],pkg)) for pkg in list(get_db().execute('SELECT * FROM packages WHERE id=%d'%package_id))]
     if len(package) == 0:
         abort(404)
     if not request.json:
@@ -110,14 +110,23 @@ def update_package(package_id):
     package[0]['program'] = request.json.get('program', package[0]['program'])
     package[0]['url'] = request.json.get('url', package[0]['url'])
     package[0]['images'] = request.json.get('images', package[0]['images'])
+    package[0]['id'] = package_id
+    with app.app_context():
+        db = get_db()
+        db.cursor().execute("UPDATE packages SET ('{title}', '{program}', '{url}', \"{images}\", \"{description}\") WHERE id={id}".format(**package[0])) #untested
+        db.commit()
+    
     return jsonify({'package': make_public_package(package[0])})
 @app.route('/ricedb/api/v1.0/packages/<int:package_id>', methods=['DELETE'])
 @auth.login_required
 def delete_package(package_id):
-    package = list(filter(lambda t: t['id'] == package_id, packages))
+    package = [dict(zip(['id','title','program','url','images','description'],pkg)) for pkg in list(get_db().execute('SELECT * FROM packages WHERE id=%d'%package_id))]
     if len(package) == 0:
         abort(404)
-    packages.remove(package[0])
+    with app.app_context():
+        db = get_db()
+        db.cursor().execute("DELETE from packages WHERE id="+package_id) #untested
+        db.commit()
     return jsonify({'result': True})
 
 def init_db():
